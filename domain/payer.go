@@ -7,36 +7,45 @@ import (
 	"time"
 )
 
+// Definition of a payer
 type Payer struct {
-	Name    string
-	Balance int
+	Payer  string
+	Points int
 }
 
+// Request wrapper for a points transaction
 type PointsTxnRequest struct {
-	payer     string
-	points    int
-	timestamp string
+	Payer     string `json:"payer"`
+	Points    int    `json:"points"`
+	Timestamp string `json:"timestamp"`
 }
 
+// Request wrapper for spending points
+type SpendRequest struct {
+	Points int `json:"points"`
+}
+
+// Definition of a points transaction
 type PointsTransaction struct {
 	Id        uuid.UUID
-	Name      string
-	Amount    int
+	Payer     string
+	Points    int
 	Timestamp time.Time
 	Committed bool
 }
 
+// In memory storage for payers and points transactions
 var PayerByName map[string]*Payer
 var PointsTransactionByName map[string][]*PointsTransaction
 
 // Store the Payer in memory database.
 func StorePayer(payer Payer) {
-	PayerByName[payer.Name] = &payer
+	PayerByName[payer.Payer] = &payer
 }
 
-// Store the transaction request in memory database.
+// Store the transaction request in memory database (after converting it from the request wrapper and parsing time.)
 func StorePointsTransaction(txn PointsTxnRequest) (*PointsTransaction, error) {
-	time, err := parseTime(txn.timestamp)
+	time, err := parseTime(txn.Timestamp)
 
 	if err != nil {
 		return nil, err
@@ -44,13 +53,13 @@ func StorePointsTransaction(txn PointsTxnRequest) (*PointsTransaction, error) {
 
 	newT := PointsTransaction{
 		Id:        uuid.New(),
-		Name:      txn.payer,
-		Amount:    txn.points,
+		Payer:     txn.Payer,
+		Points:    txn.Points,
 		Timestamp: *time,
 		Committed: false,
 	}
 
-	PointsTransactionByName[newT.Name] = append(PointsTransactionByName[newT.Name], &newT)
+	PointsTransactionByName[newT.Payer] = append(PointsTransactionByName[newT.Payer], &newT)
 
 	return &newT, nil
 }
@@ -61,18 +70,18 @@ func ProcessTransaction(txn *PointsTransaction) *Payer {
 		return nil
 	}
 
-	payer := PayerByName[txn.Name]
+	payer := PayerByName[txn.Payer]
 	if payer == nil {
 		payer = &Payer{
-			Name:    txn.Name,
-			Balance: 0,
+			Payer:  txn.Payer,
+			Points: 0,
 		}
-		PayerByName[txn.Name] = payer
+		PayerByName[txn.Payer] = payer
 	}
 
-	PayerByName[txn.Name].Balance = txn.Amount
+	PayerByName[txn.Payer].Points += txn.Points
 
-	for _, t := range PointsTransactionByName[txn.Name] {
+	for _, t := range PointsTransactionByName[txn.Payer] {
 		if txn.Id == t.Id {
 			t.Committed = true
 		}
@@ -83,9 +92,9 @@ func ProcessTransaction(txn *PointsTransaction) *Payer {
 
 // Utility function to parse time strings in YYYY-MM-DDTHH:MM:SSZ format to golang Time structs
 func parseTime(t string) (*time.Time, error) {
-	tt, err := time.Parse("2022-01-01T13:00:00Z", t)
+	tt, err := time.Parse("2006-01-02T15:04:05Z", t)
 	if err != nil {
-		log.Fatalf("Failed to parse time: %s", err)
+		log.Println("Failed to parse time: %s", err)
 		return nil, errors.New("unable to parse timestamp from provided time value")
 	}
 
