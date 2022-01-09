@@ -1,0 +1,163 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Simple points tracking API",
+    "description": "Track points",
+    "contact": {
+      "email": "me@acarr.org"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://virtserver.swaggerhub.com/aliasdhacker/Points/1.0.0",
+      "description": "Points example app"
+    }
+  ],
+  "tags": [
+    {
+      "name": "users",
+      "description": "operations available to all"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "tags": [
+            "users"
+        ],
+        "summary": "Display points balances",
+        "description": "get all points balances\n",
+        "operationId": "GetPointsBalances",
+        "responses": {
+          "200": {
+            "description": "all points",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Points"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/newTxn": {
+      "post": {
+        "tags": [
+            "users"
+        ],
+        "summary": "create a new points transaction",
+        "description": "Adds a points transaction",
+        "operationId": "createNewTransaction",
+        "requestBody": {
+          "description": "Points txn to add",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PointsTransaction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "transaction"
+          }
+        }
+      }
+    },
+    "/spend": {
+      "post": {
+        "tags": [
+            "users"
+        ],
+        "summary": "Spend points",
+        "description": "Spends points",
+        "operationId": "spend",
+        "requestBody": {
+          "description": "points to spend",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Spend"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "balances withdrawn from"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Points": {
+        "required": [
+            "payer",
+            "points"
+        ],
+        "type": "object",
+        "properties": {
+          "payer": {
+            "type": "string",
+            "example": "DANNON"
+          },
+          "points": {
+            "type": "integer",
+            "example": 200
+          },
+          "releaseDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PointsTransaction": {
+        "required": [
+            "payer",
+            "points",
+            "timestamp"
+        ],
+        "type": "object",
+        "properties": {
+          "payer": {
+            "type": "string",
+            "example": "DANNON"
+          },
+          "points": {
+            "type": "integer",
+            "example": 200
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Spend": {
+        "required": [
+            "points"
+        ],
+        "type": "object",
+        "properties": {
+          "points": {
+            "type": "integer",
+            "example": 200
+          }
+        }
+      }
+    }
+  }
+}
