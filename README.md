@@ -1,5 +1,16 @@
 # needlepoints
 
+This application is used to track and spent points.  "Gifting" points is done by adding a new transaction.  Specify the amount of points, the payer, and the timestamp.
+
+Use the "Spend" url to spend these points, the application spends the oldest points first, not letting any one payer points balance go below zero.
+
+This is a go application, built on go 1.16.2.  To run the application checkout this source code, install golang 1.16.2, browse to this source directory and type "go build ."
+
+This should create an executable called "needlepoint.exe"
+
+I have included the EXE in the repo, you should be able to just run this application from the EXE.
+
+
 3 endpoints exposed
  (Default listen, localhost port 4000)
  
